@@ -368,7 +368,7 @@ class DeepSpeedRLHFEngine():
         log_init("Actor", stime=stime)
 
         return actor_engine
-    # no need to optimize
+    # no need  optimizer and lr_scheduler
     def _init_ref(self, actor_model_name_or_path):
         stime = log_init("Ref")
         # DS Config
@@ -394,7 +394,7 @@ class DeepSpeedRLHFEngine():
 
         log_init("Ref", stime=stime)
         return ref_engine
-
+    # no need optimizer and lr_sheduler
     def _init_ema(self, actor_model_name_or_path):
         stime = log_init("EMA")
         # DS Config
@@ -481,7 +481,7 @@ class DeepSpeedRLHFEngine():
 
         log_init("Critic", stime=stime)
         return critic_engine
-
+    # 
     def _init_reward(self, critic_model_name_or_path):
         stime = log_init("Reward")
         # DS Config

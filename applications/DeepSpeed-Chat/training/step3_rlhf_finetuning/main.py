@@ -311,12 +311,13 @@ def create_datasets(args, tokenizer, train_phase=3):
         args.local_rank, args.data_path, args.data_split,
         args.data_output_path, train_phase, args.seed, tokenizer,
         args.max_prompt_seq_len)
+    print(f"the length of prompt train dataset is {len(prompt_train_dataset)}")
     if unsupervised_training_enabled:
         unsupervised_train_dataset = get_unsupervised_data(args, tokenizer)
     else:
         unsupervised_train_dataset = None
 
-    # DataLoaders creation:
+    # DataLoaders creation: here, we have 
     data_collator = DataCollatorRLHF(args.max_prompt_seq_len,
                                      args.inference_tp_size)
     if args.local_rank == -1:
@@ -334,6 +335,7 @@ def create_datasets(args, tokenizer, train_phase=3):
         collate_fn=data_collator,
         sampler=prompt_train_sampler,
         batch_size=args.per_device_train_batch_size)
+    print(f"the length of prompt train dataloader is {len(prompt_train_dataloader)}")
     if unsupervised_training_enabled:
         unsupervised_train_dataloader = DataLoader(
             unsupervised_train_dataset,

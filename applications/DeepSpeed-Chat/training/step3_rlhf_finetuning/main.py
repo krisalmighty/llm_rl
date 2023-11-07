@@ -382,7 +382,7 @@ def main():
     tokenizer.pad_token = tokenizer.eos_token
     # make sure tokenizer is right pad in our logic
     tokenizer.padding_side = 'right'
-    # note that we don't need ground trueth in RLHF since we use reward model classify, we only need promt feature
+    # note that we don't need ground trueth in RLHF since we use reward model to classify, we only need promt feature
     prompt_train_dataloader, unsupervised_train_dataloader, num_total_iters = create_datasets(
         args=args, tokenizer=tokenizer, train_phase=3)
 

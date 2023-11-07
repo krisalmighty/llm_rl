@@ -340,7 +340,8 @@ class DeepSpeedPPOTrainer():
         max_min_length = self.max_answer_seq_len + prompts.shape[1]
 
         with torch.no_grad():
-            # input list of strings, output list of ids
+            # 
+            # 
             seq = self.actor_model.module.generate(prompts,
                                                    attention_mask=mask,
                                                    max_length=max_min_length,
@@ -366,15 +367,18 @@ class DeepSpeedPPOTrainer():
 
     def generate_experience(self, prompts, mask):
         self.eval()
+        # (batch_size, sequence_length)
         seq = self._generate_sequence(prompts, mask)
         self.train()
-
+        # create attention mask
         pad_token_id = self.tokenizer.pad_token_id
         attention_mask = seq.not_equal(pad_token_id).long()
 
         with torch.no_grad():
+            # output includes output_hidden_states
             output = self.actor_model(seq, attention_mask=attention_mask)
             output_ref = self.ref_model(seq, attention_mask=attention_mask)
+            #
             reward_score = self.reward_model.forward_value(
                 seq, attention_mask,
                 prompt_length=self.prompt_length)['chosen_end_scores'].detach(
@@ -386,10 +390,12 @@ class DeepSpeedPPOTrainer():
         logits_ref = output_ref.logits
 
         return {
+            # (batch_size, sequence_length)
             'prompts': prompts,
+            # (batch_size, sequence_length)
             'logprobs': gather_log_probs(logits[:, :-1, :], seq[:, 1:]),
-            'ref_logprobs': gather_log_probs(logits_ref[:, :-1, :], seq[:,
-                                                                        1:]),
+            'ref_logprobs': gather_log_probs(logits_ref[:, :-1, :], seq[:, 1:]),
+            # (batch_size, sequence_length)                                                          
             'value': values,
             'rewards': reward_score,
             'input_ids': seq,

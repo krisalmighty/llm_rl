@@ -481,7 +481,7 @@ class DeepSpeedRLHFEngine():
 
         log_init("Critic", stime=stime)
         return critic_engine
-    # 
+    # ini
     def _init_reward(self, critic_model_name_or_path):
         stime = log_init("Reward")
         # DS Config

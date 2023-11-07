@@ -451,7 +451,8 @@ class DataCollatorRLHF:
         batch["chosen"] = chosen_token
         batch["chosen_att_mask"] = chosen_mask
 
-
+        # reverse  along second dimention
+        
         batch["prompt"] = batch["prompt"].flip(1)
         batch["prompt_att_mask"] = batch["prompt_att_mask"].flip(1)
         batch["label"] = chosen

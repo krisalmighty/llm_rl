@@ -68,6 +68,7 @@ def get_raw_dataset(dataset_name, output_path, seed, local_rank):
         chat_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.path.pardir,
                          os.path.pardir, os.path.pardir))
+        print(f"the data path is{chat_path}")
         if not (os.path.isfile(chat_path + '/data/train.json')
                 and os.path.isfile(chat_path + '/data/eval.json')):
             raise RuntimeError(

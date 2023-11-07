@@ -74,6 +74,7 @@ class DeepSpeedPGTrainer():
                                                    attention_mask=mask,
                                                    max_length=max_min_length,
                                                    min_length=max_min_length)
+            # input List of tokenized input ids, Returns List of strings
             result = self.tokenizer.batch_decode(seq,
                                     skip_special_tokens=True,
                                     clean_up_tokenization_spaces=False)
@@ -339,6 +340,7 @@ class DeepSpeedPPOTrainer():
         max_min_length = self.max_answer_seq_len + prompts.shape[1]
 
         with torch.no_grad():
+            # input list of strings, output list of ids
             seq = self.actor_model.module.generate(prompts,
                                                    attention_mask=mask,
                                                    max_length=max_min_length,

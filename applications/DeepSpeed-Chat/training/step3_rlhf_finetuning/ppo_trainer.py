@@ -391,24 +391,28 @@ class DeepSpeedPPOTrainer():
 
         return {
             # (batch_size, sequence_length)
+            # current state
             'prompts': prompts,
-            # (batch_size, sequence_length)
+            # (batch_size, sequence_length) action
             'logprobs': gather_log_probs(logits[:, :-1, :], seq[:, 1:]),
             'ref_logprobs': gather_log_probs(logits_ref[:, :-1, :], seq[:, 1:]),
             # (batch_size, sequence_length)                                                          
             'value': values,
             'rewards': reward_score,
+            # below two together next state
             'input_ids': seq,
             "attention_mask": attention_mask
         }
 
     def compute_rewards(self, prompts, log_probs, ref_log_probs, reward_score,
                         action_mask):
-
+        # tokenwise KL divergenece, 
         kl_divergence_estimate = -self.kl_ctl * (log_probs - ref_log_probs)
+        # tokenwise Rewards
         rewards = kl_divergence_estimate
         start = prompts.shape[1] - 1
         ends = start + action_mask[:, start:].sum(1)
+        # constraint the reward range
         reward_clip = torch.clamp(reward_score, -self.clip_reward_value,
                                   self.clip_reward_value)
         batch_size = log_probs.shape[0]

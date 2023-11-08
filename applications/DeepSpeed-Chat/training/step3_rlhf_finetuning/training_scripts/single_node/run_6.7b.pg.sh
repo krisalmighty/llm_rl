@@ -26,7 +26,7 @@ Critic_Lr=5e-6
 
 deepspeed --master_port 12346 main_pg.py \
    --data_path local/jsonfile \
-   --data_split 2,4,4 \
+   --data_split 9,1,1 \
    --actor_model_name_or_path $ACTOR_MODEL_PATH \
    --critic_model_name_or_path $CRITIC_MODEL_PATH \
    --num_padding_at_beginning 1 \

@@ -396,8 +396,10 @@ class DeepSpeedPPOTrainer():
             # (batch_size, sequence_length) action
             'logprobs': gather_log_probs(logits[:, :-1, :], seq[:, 1:]),
             'ref_logprobs': gather_log_probs(logits_ref[:, :-1, :], seq[:, 1:]),
-            # (batch_size, sequence_length)                                                          
+            # (batch_size, sequence_length)  
+            # tokenwise rewards                                                        
             'value': values,
+            # sequence level reward
             'rewards': reward_score,
             # below two together next state
             'input_ids': seq,
@@ -413,6 +415,7 @@ class DeepSpeedPPOTrainer():
         start = prompts.shape[1] - 1
         ends = start + action_mask[:, start:].sum(1)
         # constraint the reward range
+        # this reward_score is sequence_wise reward, calculated by reward model
         reward_clip = torch.clamp(reward_score, -self.clip_reward_value,
                                   self.clip_reward_value)
         batch_size = log_probs.shape[0]
@@ -492,8 +495,11 @@ class DeepSpeedPPOTrainer():
         advantages_reversed = []
         length = rewards.size()[-1]
         for t in reversed(range(start, length)):
+            # V(t+1)
             nextvalues = values[:, t + 1] if t < length - 1 else 0.0
+            # delta = r(t) + gamma * V(t+1) - V(t)
             delta = rewards[:, t] + self.gamma * nextvalues - values[:, t]
+            # A(t) = delta +gamma * lambda * A(t+1)
             lastgaelam = delta + self.gamma * self.lam * lastgaelam
             advantages_reversed.append(lastgaelam)
         advantages = torch.stack(advantages_reversed[::-1], dim=1)

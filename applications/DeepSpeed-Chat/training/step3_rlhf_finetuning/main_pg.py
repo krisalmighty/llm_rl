@@ -449,13 +449,13 @@ def main():
             out = trainer.generate_experience_chosen(batch_prompt['prompt'], batch_prompt['label'],
                                               batch_prompt['prompt_att_mask'], batch_prompt['chosen'],
                                               batch_prompt['chosen_att_mask'] )
-            print(f"the size of prompt is {out.prompts.size()}")
-            print(f"the size of logprobs is {out.logprobs.size()}")
-            print(f"the size of value is {out.value.size()}")
-            print(f"the size of rewards is {out.rewards.size()}")
-            print(f"the size of input_ids is {out.input_ids.size()}")
-            print(f"the size of attention_mask is {out.attention_mask.size()}")
-            print(f"the size of chosen is {out.chosen.size()}")
+            #print(f"the size of prompt is {out['prompts'].size()}") # [per_device_mini_train_batch_size, 256]
+            #print(f"the size of logprobs is {out['logprobs'].size()}") # [per_device_mini_train_batch_size, 511]
+            #print(f"the size of value is {size(out['value'])}")
+            #print(f"the size of rewards is {out['rewards'].size()}") # [per_device_mini_train_batch_size]
+            #print(f"the size of input_ids is {out['input_ids'].size()}") # [per_device_mini_train_batch_size, 512]
+            #print(f"the size of attention_mask is {out['attention_mask'].size()}") # [per_device_mini_train_batch_size, 512]
+            #print(f"the size of chosen is {out['chosen'].size()}") # [per_device_mini_train_batch_size, 151]
             exp_dataset = exp_mini_dataset.add(out)
 
             if exp_dataset is not None:

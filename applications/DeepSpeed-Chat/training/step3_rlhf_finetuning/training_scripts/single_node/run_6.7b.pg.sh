@@ -30,8 +30,8 @@ deepspeed --master_port 12346 main_pg.py \
    --actor_model_name_or_path $ACTOR_MODEL_PATH \
    --critic_model_name_or_path $CRITIC_MODEL_PATH \
    --num_padding_at_beginning 1 \
-   --per_device_train_batch_size 2 \
-   --per_device_mini_train_batch_size 2 \
+   --per_device_train_batch_size 8 \
+   --per_device_mini_train_batch_size 8 \
    --generation_batch_numbers 1 \
    --ppo_epochs 1 \
    --max_answer_seq_len 256 \
@@ -40,7 +40,7 @@ deepspeed --master_port 12346 main_pg.py \
    --critic_learning_rate ${Critic_Lr} \
    --actor_weight_decay 0.1 \
    --critic_weight_decay 0.1 \
-   --num_train_epochs 20 \
+   --num_train_epochs 10 \
    --lr_scheduler_type cosine \
    --gradient_accumulation_steps 2 \
    --actor_gradient_checkpointing \

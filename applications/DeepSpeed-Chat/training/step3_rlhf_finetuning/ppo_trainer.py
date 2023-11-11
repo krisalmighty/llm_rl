@@ -96,7 +96,8 @@ class DeepSpeedPGTrainer():
         out_seq = torch.cat(out_seq, dim=0)  # concate output in the batch dim
 
         return out_seq, result
-
+    # the way to calcuate reward is different from traditional actor critic ppo, that we use generated
+    # sequence and ground truth(chosen/labels) to calculate
     def calculate_reward(self, seq, labels):
         result = self.tokenizer.batch_decode(seq,
                                     skip_special_tokens=True,
@@ -146,7 +147,7 @@ class DeepSpeedPGTrainer():
 
         logits = output.logits
         logits_ref = output_ref.logits
-
+        # note that we need chosen(ground truth) here
         return {
             'prompts': prompts,
             'logprobs': gather_log_probs(logits[:, :-1, :], seq[:, 1:]),
@@ -254,7 +255,9 @@ class DeepSpeedPGTrainer():
             delta = rewards[:, t] #+ self.gamma * nextvalues - values[:, t]
             lastgaelam = delta + self.gamma * self.lam * lastgaelam
             advantages_reversed.append(lastgaelam)
+        # advantage here is the accumulative rewards
         advantages = torch.stack(advantages_reversed[::-1], dim=1)
+        # don't need this return any more
         returns = advantages #+ values[:, start:]
         return advantages.detach(), returns
 
@@ -423,7 +426,7 @@ class DeepSpeedPPOTrainer():
             rewards[j, start:ends[j]][-1] += reward_clip[j]
 
         return rewards
-
+    # the input data is experience replay data
     def train_rlhf(self, inputs):
         # train the rlhf mode here
         ### process the old outputs
@@ -439,7 +442,9 @@ class DeepSpeedPPOTrainer():
         action_mask = attention_mask[:, 1:]
 
         old_values = values
+        # the log
         with torch.no_grad():
+            # here the log_probs and ref_log_probs are old probs that generated from old actor
             old_rewards = self.compute_rewards(prompts, log_probs,
                                                ref_log_probs, reward_score,
                                                action_mask)
@@ -448,6 +453,7 @@ class DeepSpeedPPOTrainer():
 
         ### process the new outputs
         batch = {'input_ids': seq, "attention_mask": attention_mask}
+        # we generate uptodate actor prob and critic value 
         actor_prob = self.actor_model(**batch, use_cache=False).logits
         actor_log_prob = gather_log_probs(actor_prob[:, :-1, :], seq[:, 1:])
         actor_loss = self.actor_loss_fn(actor_log_prob[:, start:],
@@ -468,6 +474,7 @@ class DeepSpeedPPOTrainer():
 
     def actor_loss_fn(self, logprobs, old_logprobs, advantages, mask):
         ## policy gradient loss
+        # clipped ppo, unlipped/clipped ratio, gradient ascent, but in actual training,  we need gradient descent, so - 
         log_ratio = (logprobs - old_logprobs) * mask
         ratio = torch.exp(log_ratio)
         pg_loss1 = -advantages * ratio
